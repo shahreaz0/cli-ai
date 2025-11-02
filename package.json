@@ -1,0 +1,14 @@
+{
+  "name": "genai",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@tavily/core": "^0.5.12",
+    "groq-sdk": "^0.34.0"
+  }
+}
