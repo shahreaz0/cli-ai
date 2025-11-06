@@ -3,6 +3,7 @@ import { stdin as input, stdout as output } from "node:process";
 
 import Groq from "groq-sdk";
 import { tavily } from "@tavily/core";
+import { prisma } from "../../../prisma";
 
 const tvly = tavily({ apiKey: Bun.env.TAVILY_API_KEY });
 
@@ -24,12 +25,28 @@ export const SYSTEM_PROMPT = `
     Date and Time: ${now}
 `;
 
-export async function getGroqChatCompletion(userPrompt: string) {
+export async function getGroqChatCompletion(userPrompt: string, sessionId: string) {
+  const res = await prisma.chat.findMany({
+    where: {
+      sessionId: sessionId,
+    },
+    orderBy: {
+      createdAt: "asc",
+    },
+  });
+
+  const chats = res.map((chat) => ({
+    content: chat.content,
+    role: chat.role.toLocaleLowerCase(),
+    tool_call_id: chat?.toolCallId,
+  })) as Groq.Chat.Completions.ChatCompletionMessageParam[];
+
   const messages: Groq.Chat.Completions.ChatCompletionMessageParam[] = [
     {
       role: "system",
       content: SYSTEM_PROMPT,
     },
+    ...chats,
     {
       role: "user",
       content: userPrompt,
